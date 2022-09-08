@@ -1,58 +1,14 @@
 import numpy as np
-from tqdm import trange 
-#from numba import njit
-import ast2000tools.constants as const
 import ast2000tools.utils as utils
 from ast2000tools.solar_system import SolarSystem
 from ast2000tools.space_mission import SpaceMission
-from part1D import N_H2, N_b, mean_f, fl_s, fuel_m, sc_m
+from f_rocket_launch import rocket_launch
+from part1D import m_H2, N_H2, N_box, mean_f, fuel_loss_s, fuel_m, spacecraft_m
 
 utils.check_for_newer_version()
 seed = utils.get_seed('hask')
 system = SolarSystem(seed)
 mission = SpaceMission(seed)
-'''
-print(system.aphelion_angles)
-print(system.eccentricities)
-print(system.has_moons)
-print(system.initial_orbital_angles)
-print(system.initial_positions)
-print(system.initial_velocities)
-'''
-
-def rocket_launch(r0, v0, max_time, dt, tot_f, mlr, fuel_m, sc_m):
-    v_esc = np.sqrt(2*const.G*system.masses[0]*const.m_sun/(system.radii[0]*10**3))     # the escape velocity for our home planet [m/s]
-    sim_launch_duration = 0                                                             # duration of our simulated rocket launch [s]
-    rocket_m = sc_m + fuel_m + const.m_H2*N_H2*N_b                                      # initial rocket mass [kg]
-    N = max_time/dt                     # number of time steps
-    r = np.zeros((int(N), 2))   
-    v = np.zeros((int(N), 2))
-    r[0] = r0                           # initial position [m]
-    v[0] = v0                           # initial velocity [m/s]
-    for i in range(int(N) - 1):
-        rocket_m -= mlr                                             # updating the rocket's mass during the launch
-        fG = gravity(r[i], rocket_m)                                # the gravitational pull from our home planet [N]
-        a = np.array([(tot_f + fG[0])/rocket_m, fG[1]/rocket_m])    # the rocket's total acceleration at current time step [m/s**2]
-        v[i+1] = v[i] + a*dt                                        # updated velocity
-        r[i+1] = r[i] + v[i+1]*dt                                   # updated position
-        #print(np.linalg.norm(v[i+1]))
-        if tot_f <= np.linalg.norm(fG):               # checking if the thrust force is too low       
-            print('Thrust force is too low!')
-            break
-        #if np.linalg.norm(v[i+1]) >= v_esc:
-        if v[i+1][0] >= v_esc:                        # checking if the rocket has reached the escape velocity
-            r = r[:i+1]
-            v = v[:i+1]
-            sim_launch_duration = i*dt                # updating the duration of our simulated rocket launch
-            break                                     
-    return r, v, sim_launch_duration, rocket_m
-    
-def gravity(r, rocket_m):
-    theta = r[0]/np.linalg.norm(r)                                                  # angle between our current 
-                                                                                    # positional vector and the x-axis
-    abs_fG = - const.G*system.masses[0]*const.m_sun*rocket_m/np.linalg.norm(r)**2   # absolute value of the gravitational pull
-    fG = np.array([abs_fG*np.cos(theta), abs_fG*np.sin(theta)])                     # vectorized gravitational pull
-    return fG
 
 '''
 let's assume that we wish to lauch our rocket from the equator, on the side of the
@@ -63,18 +19,26 @@ r0 = np.array([utils.AU_to_m(system.initial_positions[0][0]) + system.radii[0]*1
 v0 = np.array([utils.AU_pr_yr_to_m_pr_s(system.initial_velocities[0][0]), 
                  utils.AU_pr_yr_to_m_pr_s(system.initial_velocities[1][0])])
 
-dt = 1                              # time step [s]
-max_time = 20*60                    # maximum launch time [s]
+dt = 1                                                  # time step [s]
+max_time = 20*60                                        # maximum launch time [s]
 
-tot_f = N_b*mean_f                  # the rocket's total thrust force [N]
-mlr = N_b*fl_s                      # mass loss rate [kg/s]
+initial_m = spacecraft_m + fuel_m + m_H2*N_H2*N_box     # initial rocket mass [kg]
+thrust_f = N_box*mean_f                                 # the rocket's total thrust force [N]
+mass_loss_rate = N_box*fuel_loss_s                      # mass loss rate [kg/s]
 
-r, v, sim_launch_duration, final_m = rocket_launch(r0, v0, max_time, dt, tot_f, mlr, fuel_m, sc_m)
+r, v, sim_launch_duration, final_m = rocket_launch(r0, v0, max_time, dt, initial_m, thrust_f, mass_loss_rate)
 
+'''
 print(r[0], r[-1])
 print(v[-1])
 print(sim_launch_duration)
 print(final_m)
+'''
+
+print(f"The rocket's position is at x = {r[-1][0]/10**3:g} km, y = {r[-1][0]/10**3:g} km\nwhen it reaches the escape velocity")
+print(f"When the rocket reaches it's escape velocity of {np.linalg.norm(v[-1]):g}, it's\nvelocity has a horisontal component of {v[-1][0]:g} m/s and a vertical\ncomponent of {v[-1][1]:g} m/s")
+print(f"The simulated rocket launch took {sim_launch_duration} seconds, which is\napproximately {int(sim_launch_duration/60)} minutes")
+print(f"When the rocket reached it's escape velocity, it's total mass was\ndown to {final_m:g} kg, which means it lost a total of {initial_m - final_m:g} kg fuel\nduring the launch")
 
 '''
 THRUST FORCE ER FOR LAV, MEN LAUNCH TIME BLIR BARE KORTERE JO FLERE PARTIKLER
