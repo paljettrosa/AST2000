@@ -2,6 +2,7 @@ import numpy as np
 import scipy.integrate as sp
 import matplotlib.pyplot as plt
 import ast2000tools.constants as const
+from f_MaxwellBoltzmann_v import MaxwellBoltzmann_v
 
 '''
 1. A First Meeting with the Gaussian Distribution
@@ -32,14 +33,13 @@ in an area with an x-coordinate between a and b (???) f er probability density f
 
 '''
 we chose two random values for my and sigma to test our function
-
 '''
+
 sigma = 1.0
 my = 0.0
 sigma_list = [sigma, 2*sigma, 3*sigma]
 for i in range(len(sigma_list)):
     s = float(P(- sigma_list[i] + my, sigma_list[i] + my, my, sigma))
-    #print(s)
     print(f'{s:.3f}')
 
 #1.4)
@@ -65,15 +65,15 @@ maximum, the definition of FWHM tells us that FWHM = |x| = 2*sqrt(2*ln(2))*sigma
 '''
 #2.1)
 
-N = 10**5                   # number of H_2 molecules
+N_H2 = 10**5                # number of H_2 molecules
 T = 3000                    # temperature [K]
-m = const.m_H2              # mass of a H2 molecule [kg]
+m_H2 = const.m_H2           # mass of a H2 molecule [kg]
 k = const.k_B               # Boltzmann constant [m^2*kg/s^2/K]
 
-sigma = np.sqrt(k*T/m)      # the standard deviation of our particle velocities
+sigma = np.sqrt(k*T/m_H2)   # the standard deviation of our particle velocities
 
 vx_lim = 2.5*10**4
-vx = np.linspace(- vx_lim, vx_lim, N)
+vx = np.linspace(- vx_lim, vx_lim, N_H2)
 
 plt.subplot(2, 1, 1)
 plt.plot(vx, f(vx, my, sigma))
@@ -92,7 +92,7 @@ print(prob)
 this equals to about 7.76% of the particles
 '''
 
-amount = N*prob
+amount = N_H2*prob
 print(amount)
 
 '''
@@ -110,13 +110,11 @@ of the velocity. this is because the axwell - Boltzmann distribution function
 for absolute velocity does not give us a symmetrical curve, and a Gaussian
 curve is always symmetrical
 '''
-def MaxwellBoltzmann_v(m, k, T, v):
-    return (m/(2*np.pi*k*T))**(3/2)*np.exp(-(1/2)*(m*v**2/(k*T)))*4*np.pi*v**2
 
-v = np.linspace(0, 3*10**4, N)
+v = np.linspace(0, 3*10**4, N_H2)
 
 plt.subplot(2, 1, 2)
-plt.plot(v, MaxwellBoltzmann_v(m, k, T, v))
+plt.plot(v, MaxwellBoltzmann_v(m_H2, k, T, v))
 
 '''
 this plot is not in conflict with our plot of the x-component of the velocity
