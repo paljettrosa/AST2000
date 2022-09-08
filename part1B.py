@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ast2000tools.constants as const
 from tqdm import trange
+#from numba import njit
 
+#@njit
 def gasbox(my, sigma, N, L, time, steps):
     r = np.random.uniform(0, L, size = (int(N), 3))         # position vector
     v = np.random.normal(my, sigma, size = (int(N), 3))     # velocity vector
