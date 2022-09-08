@@ -26,7 +26,7 @@ initial_m = spacecraft_m + fuel_m + m_H2*N_H2*N_box     # initial rocket mass [k
 thrust_f = N_box*mean_f                                 # the rocket's total thrust force [N]
 mass_loss_rate = N_box*fuel_loss_s                      # mass loss rate [kg/s]
 
-r, v, sim_launch_duration, final_m = rocket_launch(r0, v0, max_time, dt, initial_m, thrust_f, mass_loss_rate)
+r, v, sim_launch_duration, final_m = rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate)
 
 '''
 print(r[0], r[-1])
