@@ -17,9 +17,6 @@ steps = 1000                # number of steps taken in simulation
 
 r, v, exiting, f = gasboxwnozzle(my, sigma, N_H2, L, time, steps)
 
-print(exiting)
-print(f)
-
 particles_s = exiting/time          # the number of particles exiting per second [s**(-1)]
 mean_f = f/steps                    # the box force averaged over all time steps [N]
 fuel_loss_s = particles_s*m_H2      # the total fuel loss per second [kg/s]
