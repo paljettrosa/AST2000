@@ -1,5 +1,4 @@
 import numpy as np
-import ast2000tools.constants as const
 import ast2000tools.utils as utils
 from ast2000tools.solar_system import SolarSystem
 from ast2000tools.space_mission import SpaceMission
@@ -10,8 +9,7 @@ seed = utils.get_seed('hask')
 system = SolarSystem(seed)
 mission = SpaceMission(seed)
 
-def rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate):
-    v_esc = np.sqrt(2*const.G*system.masses[0]*const.m_sun/(system.radii[0]*10**3))     # the escape velocity for our home planet [m/s]
+def rocket_launch(r0, v0, v_esc, max_time, dt, thrust_f, initial_m, mass_loss_rate):
     sim_launch_duration = 0                                                             # duration of our simulated rocket launch [s]
     rocket_m = initial_m                                                                # the rocket's total mass [kg]
     N = max_time/dt                     # number of time steps
@@ -28,7 +26,7 @@ def rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate):
         if thrust_f <= np.linalg.norm(fG):                              # checking if the thrust force is too low       
             print('Thrust force is too low!')
             break
-        if v[i+1][0] >= v_esc:                        # checking if the rocket has reached the escape velocity
+        if np.linalg.norm(v[i+1]) >= v_esc:           # checking if the rocket has reached the escape velocity
             r = r[:i+1]
             v = v[:i+1]
             sim_launch_duration = i*dt                # updating the duration of our simulated rocket launch
