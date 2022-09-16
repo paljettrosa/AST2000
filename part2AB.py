@@ -20,34 +20,38 @@ A1. Plotting the Orbits
 
 # [M] is the unit for solar mass
 
-a = system.semi_major_axes              # each planet's semi major axis [AU]
-e = system.eccentricities               # each planet's eccentricity
-a_angles = system.aphelion_angles       # each planet's initial angle from the aphelion 
+a = system.semi_major_axes                   # each planet's semi major axis [AU]
+e = system.eccentricities                    # each planet's eccentricity
+init_angles = system.initial_orbital_angles  # the angle between each planet's initial position and the x-axis
+a_angles = system.aphelion_angles            # each planet's initial angle from the aphelion 
 
 N = 1000            #amount of time steps
 
-#@jit(nopython = True)
-def plot_orbits(planets, N, a, e, a_angles):
+@jit(nopython = True)
+def plot_orbits(planets, N, a, e, init_angles, a_angles):
+    x = np.zeros((len(planets), N))
+    y = np.zeros((len(planets), N))
     for i in range(len(planets)):
         r = np.zeros(N)
-        f = np.linspace(0, 2*np.pi, N)
+        f = np.linspace(init_angles[i], init_angles[i] + 2*np.pi, N)
         r = a[i]*(1 - e[i]**2)/(1 + e[i]*np.cos(np.pi - a_angles[i] + f))
-        ''' kunne vi ikke bare brukt system.initial_orbital_angles??? '''
-        ''' regner ut radius r for alle theta '''
-        x = r*np.cos(f)
-        y = r*np.sin(f)
-        '''
-        polarkoordinater
-        '''
-        plt.plot(x, y, color = planets[i][1], label = planets[i][0])
-    plt.plot(0, 0, color = 'orange', marker = 'o', label = 'Sun')
-    plt.legend()
-    plt.xlabel('x [AU]')
-    plt.ylabel('y [AU]')
-    plt.title("Our planet's orbits around their sun")
-    plt.show()
-    
-plot_orbits(planets, N, a, e, a_angles)
+        x[i] = r*np.cos(f)
+        y[i] = r*np.sin(f)
+    return x, y
+
+x, y = plot_orbits(planets, N, a, e, init_angles, a_angles)
+
+for i in range(len(planets)):
+    plt.plot(x[i], y[i], color = planets[i][1], label = planets[i][0])
+
+'''
+plt.plot(0, 0, color = 'orange', marker = 'o', label = 'Sun')
+plt.legend()
+plt.xlabel('x [AU]')
+plt.ylabel('y [AU]')
+plt.title("Our planet's orbits around their sun")
+plt.show()
+'''
 
 '''
 A2. Simulating the Orbits
@@ -55,7 +59,6 @@ A2. Simulating the Orbits
 
 M = system.star_mass                     # the sun's mass [M]
 
-theta0 = system.initial_orbital_angles   # the angle between each planet's initial position and the x-axis in radians
 init_pos = system.initial_positions      # each planet's initial position [AU/yr]
 init_vel = system.initial_velocities     # each planet's initial velocity [AU/yr]
 
@@ -74,12 +77,12 @@ N = 20*10**4        # amount of time steps
 dt = 20*P/N         # time step
 
 @jit(nopython = True)
-def simulate_orbits(planets, N, theta0, r0, v0, M):
+def simulate_orbits(planets, N, init_angles, r0, v0, M):
     G = 4*np.pi**2                          # gravitation constant [AU**3yr**(-2)M**(-1)]
     theta = np.zeros((N, len(planets)))
     r = np.zeros((N, len(planets), 2))
     v = np.zeros((N, len(planets), 2))
-    theta[0] = theta0
+    theta[0] = init_angles
     r[0] = r0
     v[0] = v0
     for i in range(N - 1):
@@ -93,7 +96,7 @@ def simulate_orbits(planets, N, theta0, r0, v0, M):
             theta[i+1][j] = theta[i][j] + np.linalg.norm(v[i+1][j])/np.linalg.norm(r[i+1][j])*dt
     return theta, r, v
 
-theta, r, v = simulate_orbits(planets, N, theta0, r0, v0, M)
+theta, r, v = simulate_orbits(planets, N, init_angles, r0, v0, M)
 
 for i in range(len(planets)):
     plt.plot(r[:, i, 0], r[:, i, 1], color = planets[i][1], label = planets[i][0])
