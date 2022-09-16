@@ -42,7 +42,7 @@ def plot_orbits(planets, N, a, e, init_angles, a_angles):
 x, y = plot_orbits(planets, N, a, e, init_angles, a_angles)
 
 for i in range(len(planets)):
-    plt.plot(x[i], y[i], color = planets[i][1], label = planets[i][0])
+    plt.plot(x[i], y[i], color = planets[i][1])
 
 '''
 plt.plot(0, 0, color = 'orange', marker = 'o', label = 'Sun')
