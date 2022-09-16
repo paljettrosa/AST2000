@@ -28,8 +28,7 @@ print(f'The box loses a mass of {fuel_loss_s:g} kg/s')
 #KOMMER FORDELING AV GASSPARTIKLER TIL Å FORBLI DEN SAMME OVER LENGRE TID???
 
 '''
-There are 3.5314e+13 particles exiting the gas box per second
-The gas box exerts a thrust of 4.87316e-10 N
-The box loses a mass of 1.18212e-13 kg/s
-There are 2.81344e+28 particles exiting the combustion chamber per second
+There are 3.5297e+13 particles exiting the gas box per second
+The gas box exerts a thrust of 4.87106e-10 N
+The box loses a mass of 1.18155e-13 kg/s
 '''
