@@ -123,11 +123,3 @@ because their velocities' x-component is negative, as they have y- and z-
 components as well, and the absolute velocity is determined by the square-root
 og vx^2 + vy^2 + vz^2
 '''
-
-'''
-3. Elementary Statistical Physics
-'''
-
-#3.1)
-
-#FIKS 3.3!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
