@@ -11,21 +11,14 @@ seed = utils.get_seed('hask')
 system = SolarSystem(seed)
 mission = SpaceMission(seed)
 
-T = system.rotational_periods[0]*24*60*60                                       # our planet's rotational period [s]
-R = system.radii[0]*10**3                                                       # our planet's radius [m]
-M = system.masses[0]*const.m_sun                                                # our planet's mass [kg]
-x0 = utils.AU_to_m(system.initial_positions[0][0])                              # our planet's initial x-coordinate relative to our sun
-y0 = utils.AU_to_m(system.initial_positions[1][0])                              # our planet's initial y-coordinate relative to our sun
-omega = 2*np.pi/T                                                               # our planet's rotational velocity
-v_planet = np.array([utils.AU_pr_yr_to_m_pr_s(system.initial_velocities[0][0]), # our planet's orbital velocity
-                 utils.AU_pr_yr_to_m_pr_s(system.initial_velocities[1][0])])
-v_rot = R*omega                                                                 # our rocket's initial velocity caused by our planet's rotational velocity
+R = system.radii[0]*10**3                               # our planet's radius [m]
+M = system.masses[0]*const.m_sun                        # our planet's mass [kg]
 
 '''
 let's assume that we wish to lauch our rocket from the equator, on the side of the
 planet facing away from our sun. then our initial position will be as follows
 '''
-r0 = np.array([x0 + R, y0])
+r0 = np.array([R, 0.0])
 
 '''
 when our rocket is moving away from our home planet, it's still within it's gravitational
@@ -36,7 +29,8 @@ stops rotating almost immediately after leaving our planet's surface. our rocket
 have a vertical velocity component relative to our planet, assuming that our planet rotates
 around the x-axis when it's in it's initial position
 '''
-v0 = np.array([0.0, v_rot])
+
+v0 = np.array([0.0, 0.0])
 
 v_esc = np.sqrt(2*const.G*M/R)                          # the escape velocity for our home planet [m/s]
 
@@ -55,14 +49,14 @@ print(f"The simulated rocket launch took {sim_launch_duration} seconds, which is
 print(f"When the rocket reached it's escape velocity, it's total mass was\ndown to {final_m:g} kg, which means it lost a total of {initial_m - final_m:g} kg fuel\nduring the launch")
 
 '''
-The rocket's position is at x = 7.70489e+08 km, y = 314.422 km
+The rocket's position is at x = 6080.32 km, y = -480.087 km
 when it reaches the escape velocity
-When the rocket reaches it's escape velocity of 9058.8, it's
-velocity has a horisontal component of 9052.81 m/s and a vertical
-component of 329.583 m/s
-The simulated rocket launch took 954 seconds, which is
-approximately 15 minutes
+When the rocket reaches it's escape velocity of 9004.12, it's
+velocity has a horisontal component of 8685.77 m/s and a vertical
+component of -2373.1 m/s
+The simulated rocket launch took 385 seconds, which is
+approximately 6 minutes
 When the rocket reached it's escape velocity, it's total mass was
-down to 11159.6 kg, which means it lost a total of 89940.4 kg fuel
+down to 1299.6 kg, which means it lost a total of 14800.4 kg fuel
 during the launch
 '''
