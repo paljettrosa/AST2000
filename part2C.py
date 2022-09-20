@@ -6,7 +6,7 @@ from ast2000tools.space_mission import SpaceMission
 from numba import jit
 
 utils.check_for_newer_version()
-seed = utils.get_seed('hask')
+seed = utils.get_seed('somiamc')
 system = SolarSystem(seed)
 mission = SpaceMission(seed)
 
@@ -46,8 +46,8 @@ F_v0 = np.array([init_vel[0][4], init_vel[1][4]])   # Flora's initial velocity [
 sun_r0 = np.array([0.0, 0.0])                       # our sun's initial position [AU]
 sun_v0 = - F_v0*m/M                                 # our sun's initial velocity [AU/yr]
 
-cm_r = M/(m + M)*sun_r0 + m/(m + M)*F_r0            # center of mass position
-cm_v = M/(m + M)*sun_v0 + m/(m + M)*F_v0            # center of mass velocity
+cm_r = M/(m + M)*sun_r0 + m/(m + M)*F_r0            # center of mass position relative to the sun
+cm_v = M/(m + M)*sun_v0 + m/(m + M)*F_v0            # center of mass velocity relative to the sun
 
 '''
 changing frame of reference: cm_r is the positional vector of the center of
@@ -61,6 +61,9 @@ F_v0 = F_v0 - cm_v                                  # Flora's initial velocity r
 
 sun_r0 = sun_r0 - cm_r                              # our sun's initial position relative to the center of mass
 sun_v0 = sun_v0 - cm_v                              # our sun's initial velocity relative to the center of mass
+
+#cm_r = np.array([0.0, 0.0])                         # center of mass position
+#cm_v = np.array([0.0, 0.0])                         # center of mass velocity
 
 N = 10*10**4        # amount of time steps
 dt = 10*P/N         # time step
@@ -97,11 +100,14 @@ planet_sun = np.array([['Flora', 'pink'], ['Sun', 'orange']])
 
 for i in range(2):
     plt.plot(r[:, i, 0], r[:, i, 1], color = planet_sun[i][1], label = planet_sun[i][0])
+#plt.scatter(cm_r[0], cm_r[1], color = 'k', label = 'center of mass')
 plt.legend()
 plt.title("Flora's and our sun's orbit around their center of mass")
 plt.show()
 
-plt.plot(r[:, 1, 0], r[:, 1, 1], color = 'orange')
+plt.plot(r[:, 1, 0], r[:, 1, 1], color = 'orange', label = 'Sun')
+#plt.scatter(cm_r[0], cm_r[1], color = 'k', label = 'center of mass')
+plt.legend()
 plt.title("Our sun's orbit around the center of mass")
 plt.show()
 
