@@ -6,7 +6,7 @@ from ast2000tools.space_mission import SpaceMission
 from numba import jit
 
 utils.check_for_newer_version()
-seed = utils.get_seed('hask')
+seed = utils.get_seed('somiamc')
 system = SolarSystem(seed)
 mission = SpaceMission(seed)
 
@@ -51,6 +51,8 @@ plot_orbits(planets, N, a, e, init_angles, a_angles)
 A2. Simulating the Orbits
 '''
 
+G = 4*np.pi**2                           # gravitation constant [AU**3yr**(-2)M**(-1)]
+m = system.masses                        # our planet's masses [kg]
 M = system.star_mass                     # the sun's mass [M]
 
 init_pos = system.initial_positions      # each planet's initial position [AU]
@@ -61,17 +63,14 @@ v0 = np.zeros((len(planets), 2))
 for i in range(len(planets)):
     r0[i] = np.array([init_pos[0][i], init_pos[1][i]])
     v0[i] = np.array([init_vel[0][i], init_vel[1][i]])
-    
-perihelion = a[0]*(1 - e[0]**2)/(1 + e[0]*np.cos(0))            # the perihelion of our home planet's orbit [AU]
-aphelion = a[0]*(1 - e[0]**2)/(1 + e[0]*np.cos(a_angles[0]))    # the aphelion of our home planet's orbit [AU]                     
-d = (perihelion + aphelion)/2                                   # our home planet's mean distance from the sun [AU]
-P = np.sqrt(d**3/M)                                             # our home planet's revolution period [yr]
 
-N = 30*10**4        # amount of time steps
-dt = 30*P/N         # time step
+P = np.sqrt(4*np.pi**2*a[0]**3/(G*(M + m[0])))   # our home planet's revolution period [yr]
+
+N = 40*10**4        # amount of time steps
+dt = 40*P/N         # time step
 
 @jit(nopython = True)
-def simulate_orbits(planets, N, init_angles, r0, v0, M):
+def simulate_orbits(planets, N, dt, init_angles, r0, v0, M):
     G = 4*np.pi**2                          # gravitation constant [AU**3yr**(-2)M**(-1)]
     theta = np.zeros((N, len(planets)))
     r = np.zeros((N, len(planets), 2))
@@ -89,16 +88,11 @@ def simulate_orbits(planets, N, init_angles, r0, v0, M):
             theta[i+1][j] = theta[i][j] + np.linalg.norm(v[i+1][j])/np.linalg.norm(r[i+1][j])*dt
     return theta, r, v
 
-# dropper å gange med m[i] fordi vi antar at planetene ikke trekker på sola?????????????????????????????????????????????
-
-theta, r, v = simulate_orbits(planets, N, init_angles, r0, v0, M)
+theta, r, v = simulate_orbits(planets, N, dt, init_angles, r0, v0, M)
 
 for i in range(len(planets)):
     plt.plot(r[:, i, 0], r[:, i, 1], color = planets[i][1])
 plt.show()
-
-#FIKSE LEGEND???????????????????????????????????????????????????????????????????????????????????????????????????????????
-#SKAL DE TILTE?
 
 '''
 B2: Comparing your Orbits to Kepler's Laws
@@ -142,29 +136,17 @@ def diff_area(planets, N_steps, theta, r, v):
         rel_err = diff/a_dA
         a_distance = a_mean_r*a_dtheta
         p_distance = p_mean_r*p_dtheta
-        print(f'The difference between the area close to the aphelion\nand the area close to the perihelion for {planets[i][0]} is {diff:.2f} km^2\nwith a relative error of {rel_err}')
+        print(f'The difference between the area close to the aphelion\nand the area close to the perihelion for {planets[i][0]} is {diff:.2f} km^2\nwith a relative error of {rel_err*100:.2f} %')
         print(f'{planets[i][0]} travelled {a_distance:.3f} AU while sweeping out the area by the aphelion\nand {p_distance:.3f} AU while sweeping out the area by the perihelion')
         print(f'{planets[i][0]} travelled with a mean velocity of {a_mean_v:.3f} AU/yr while sweeping\nout the area by the aphelion and {p_mean_v:.3f} AU/yr while sweeping out\nthe area by the perihelion\n')
         
 diff_area(planets, N_steps, theta, r, v)
 
-#HVORFOR ER DIFFERANSEN SÅ SINNSYKT STOR????????????????????????????????????????????????????????????????????????????????????????
-#ER DENNE FUNKSJONEN BEDRE? HVORDAN FUNKER DEN?
-'''
-def area(r, P, dt):
-    for i in range(system.number_of_planets):
-        a1 = 1/2 * r[0:1000, i] * 2*np.pi*r[0:1000, i]/P * dt
-        a2 = 1/2 * r[5000:6000, i] * 2*np.pi*r[5000:6000, i]/P * dt
-        print(f'Differansen mellom de to arealene til planet {i}: {np.abs(np.sum(a1)-np.sum(a2)):16.14}   |  Den relative feilen: {np.abs(np.sum(a1)-np.sum(a2))/np.abs(np.sum(a2))}')
-'''
 '''
 Task 2
 '''
 
 print('\n\n')
-
-G = 4*np.pi**2                          # gravitation constant [AU**3yr**(-2)M**(-1)]
-m = system.masses                       # our planet's masses [kg]
 
 count = [[],[],[],[],[],[],[]]
 Kepler_P = np.sqrt(a**3)
@@ -183,82 +165,94 @@ for i in range(len(planets)):
 #SKAL VI BRUKE SOLMASSER?
 #ER NEWTON ELLER NUMERISK FASITEN?
 
+r_reshaped = np.reshape(r, (2, 7, 400000))
+ 
+mission.verify_planet_positions(40*P, r_reshaped)
+
 '''
 The difference between the area close to the aphelion
-and the area close to the perihelion for Doofenshmirtz is 396511626568.00 km^2
-with a relative error of 8.529344557359363e-06
-Doofenshmirtz travelled 0.807 AU while sweeping out the area by the aphelion
-and 0.807 AU while sweeping out the area by the perihelion
-Doofenshmirtz travelled with a mean velocity of 4.798 AU/yr while sweeping
-out the area by the aphelion and 4.801 AU/yr while sweeping out
+and the area close to the perihelion for Doofenshmirtz is 6064006790944.00 km^2
+with a relative error of 0.03 %
+Doofenshmirtz travelled 0.534 AU while sweeping out the area by the aphelion
+and 0.546 AU while sweeping out the area by the perihelion
+Doofenshmirtz travelled with a mean velocity of 5.587 AU/yr while sweeping
+out the area by the aphelion and 5.710 AU/yr while sweeping out
 the area by the perihelion
 
 The difference between the area close to the aphelion
-and the area close to the perihelion for Blossom is 113368451379032.00 km^2
-with a relative error of 0.0021162656708760097
-Blossom travelled 0.697 AU while sweeping out the area by the aphelion
-and 0.731 AU while sweeping out the area by the perihelion
-Blossom travelled with a mean velocity of 4.143 AU/yr while sweeping
-out the area by the aphelion and 4.336 AU/yr while sweeping out
+and the area close to the perihelion for Blossom is 36039808072756.00 km^2
+with a relative error of 0.13 %
+Blossom travelled 0.421 AU while sweeping out the area by the aphelion
+and 0.422 AU while sweeping out the area by the perihelion
+Blossom travelled with a mean velocity of 4.389 AU/yr while sweeping
+out the area by the aphelion and 4.400 AU/yr while sweeping out
 the area by the perihelion
 
 The difference between the area close to the aphelion
-and the area close to the perihelion for Bubbles is 252806421694032.00 km^2
-with a relative error of 0.0021549760710779225
-Bubbles travelled 0.336 AU while sweeping out the area by the aphelion
-and 0.335 AU while sweeping out the area by the perihelion
-Bubbles travelled with a mean velocity of 1.969 AU/yr while sweeping
-out the area by the aphelion and 1.956 AU/yr while sweeping out
+and the area close to the perihelion for Bubbles is 32905150827816.00 km^2
+with a relative error of 0.05 %
+Bubbles travelled 0.199 AU while sweeping out the area by the aphelion
+and 0.199 AU while sweeping out the area by the perihelion
+Bubbles travelled with a mean velocity of 2.047 AU/yr while sweeping
+out the area by the aphelion and 2.041 AU/yr while sweeping out
 the area by the perihelion
 
 The difference between the area close to the aphelion
-and the area close to the perihelion for Buttercup is 18730351296.00 km^2
-with a relative error of 1.3911180733740257e-07
-Buttercup travelled 0.290 AU while sweeping out the area by the aphelion
-and 0.290 AU while sweeping out the area by the perihelion
-Buttercup travelled with a mean velocity of 1.723 AU/yr while sweeping
-out the area by the aphelion and 1.723 AU/yr while sweeping out
+and the area close to the perihelion for Buttercup is 3718919652664.00 km^2
+with a relative error of 0.01 %
+Buttercup travelled 0.300 AU while sweeping out the area by the aphelion
+and 0.301 AU while sweeping out the area by the perihelion
+Buttercup travelled with a mean velocity of 3.122 AU/yr while sweeping
+out the area by the aphelion and 3.137 AU/yr while sweeping out
 the area by the perihelion
 
 The difference between the area close to the aphelion
-and the area close to the perihelion for Flora is 130379361793744.00 km^2
-with a relative error of 0.0017035761942819421
-Flora travelled 0.503 AU while sweeping out the area by the aphelion
-and 0.540 AU while sweeping out the area by the perihelion
-Flora travelled with a mean velocity of 2.981 AU/yr while sweeping
-out the area by the aphelion and 3.199 AU/yr while sweeping out
+and the area close to the perihelion for Flora is 16666989451104.00 km^2
+with a relative error of 0.04 %
+Flora travelled 0.240 AU while sweeping out the area by the aphelion
+and 0.238 AU while sweeping out the area by the perihelion
+Flora travelled with a mean velocity of 2.507 AU/yr while sweeping
+out the area by the aphelion and 2.478 AU/yr while sweeping out
 the area by the perihelion
 
 The difference between the area close to the aphelion
-and the area close to the perihelion for Stella is 35815316419792.00 km^2
-with a relative error of 0.0003661256807422405
-Stella travelled 0.401 AU while sweeping out the area by the aphelion
-and 0.409 AU while sweeping out the area by the perihelion
-Stella travelled with a mean velocity of 2.379 AU/yr while sweeping
-out the area by the aphelion and 2.426 AU/yr while sweeping out
+and the area close to the perihelion for Stella is 11649877147408.00 km^2
+with a relative error of 0.04 %
+Stella travelled 0.373 AU while sweeping out the area by the aphelion
+and 0.382 AU while sweeping out the area by the perihelion
+Stella travelled with a mean velocity of 3.888 AU/yr while sweeping
+out the area by the aphelion and 3.985 AU/yr while sweeping out
 the area by the perihelion
 
 The difference between the area close to the aphelion
-and the area close to the perihelion for Aisha is 73082008438720.00 km^2
-with a relative error of 0.0019049158911102339
-Aisha travelled 1.039 AU while sweeping out the area by the aphelion
-and 1.033 AU while sweeping out the area by the perihelion
-Aisha travelled with a mean velocity of 6.118 AU/yr while sweeping
-out the area by the aphelion and 6.094 AU/yr while sweeping out
+and the area close to the perihelion for Aisha is 25014147117552.00 km^2
+with a relative error of 0.05 %
+Aisha travelled 0.210 AU while sweeping out the area by the aphelion
+and 0.209 AU while sweeping out the area by the perihelion
+Aisha travelled with a mean velocity of 2.178 AU/yr while sweeping
+out the area by the aphelion and 2.163 AU/yr while sweeping out
 the area by the perihelion
 
 
-Doofenshmirtz: numerical approximation: 6.739 years, Kepler's version: 11.684 years, Newton's version: 6.741 years
 
-Blossom: numerical approximation: 9.768 years, Kepler's version: 17.675 years, Newton's version: 10.197 years
 
-Bubbles: numerical approximation: 101.162 years, Kepler's version: 176.802 years, Newton's version: 101.994 years
+Doofenshmirtz: numerical approximation: 3.896 years, Kepler's version: 6.554 years, Newton's version: 3.896 years
 
-Buttercup: numerical approximation: 162.160 years, Kepler's version: 279.130 years, Newton's version: 160.742 years
+Blossom: numerical approximation: 7.750 years, Kepler's version: 13.337 years, Newton's version: 7.928 years
 
-Flora: numerical approximation: 26.707 years, Kepler's version: 50.598 years, Newton's version: 29.192 years
+Bubbles: numerical approximation: 117.007 years, Kepler's version: 180.651 years, Newton's version: 107.345 years
 
-Stella: numerical approximation: 59.235 years, Kepler's version: 107.177 years, Newton's version: 61.834 years
+Buttercup: numerical approximation: 23.266 years, Kepler's version: 39.328 years, Newton's version: 23.379 years
 
-Aisha: numerical approximation: 3.651 years, Kepler's version: 6.108 years, Newton's version: 3.524 years
+Flora: numerical approximation: 38.953 years, Kepler's version: 70.056 years, Newton's version: 41.639 years
+
+Stella: numerical approximation: 12.031 years, Kepler's version: 19.863 years, Newton's version: 11.808 years
+
+Aisha: numerical approximation: 61.305 years, Kepler's version: 107.245 years, Newton's version: 63.752 years
+
+
+The biggest relative deviation was for planet 0, which drifted 1108.33 % from its actual position.
+Your planets are not where they should be after 20 orbits of your home planet.
+Check your program for flaws or experiment with your time step for more precise trajectories.
 '''
+
