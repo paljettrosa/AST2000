@@ -27,10 +27,9 @@ init_pos = np.transpose(system.initial_positions)       # planets' initial posit
 init_vel = np.transpose(system.initial_velocities)      # planets' initial velocities relative to our sun [AU/yr]
 R = utils.km_to_AU(system.radii)                        # planets' radiis [AU]
 
-A_box = L*L                                     # area of one gasbox [m**2]
-A_spacecraft = mission.spacecraft_area          # area of our spacecraft's cross section [m**2]
-N_box = int(A_spacecraft/A_box)                 # number of gasboxes   
-
+box_A = L*L                                     # area of one gasbox [m**2]
+spacecraft_A = mission.spacecraft_area          # area of our spacecraft's cross section [m**2]
+N_box = int(spacecraft_A/box_A)                 # number of gasboxes   
 spacecraft_m = mission.spacecraft_mass          # mass of rocket without fuel [kg]
 
 
@@ -137,8 +136,8 @@ Manuel Orientation
 dt = 1                                  # time step length for launch [s]
 max_time = 20*60                        # maximum launch duration [s]
 
-N_H2 = 5*10**6
-fuel_m = 5*10**4
+N_H2 = 6*10**6
+fuel_m = 4.5*10**4
 
 r, v, exiting, f = gasboxwnozzle(my, sigma, N_H2, m_H2, L, time, steps)
     
