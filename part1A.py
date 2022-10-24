@@ -1,6 +1,16 @@
 #EGEN KODE
-from libraries import *
+import numpy as np
+import matplotlib.pyplot as plt
+import ast2000tools.constants as const
+import ast2000tools.utils as utils
+from ast2000tools.solar_system import SolarSystem
+from ast2000tools.space_mission import SpaceMission
 import scipy.integrate as sp
+
+utils.check_for_newer_version()
+seed = utils.get_seed('somiamc')
+system = SolarSystem(seed)
+mission = SpaceMission(seed)
 
 def MaxwellBoltzmann_v(m, k, T, v):
     return (m/(2*np.pi*k*T))**(3/2)*np.exp(-(1/2)*(m*v**2/(k*T)))*4*np.pi*v**2

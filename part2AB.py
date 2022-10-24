@@ -1,5 +1,21 @@
 #EGEN KODE
-from libraries import *
+import numpy as np
+import matplotlib.pyplot as plt
+from numba import jit
+import ast2000tools.utils as utils
+from ast2000tools.solar_system import SolarSystem
+from ast2000tools.space_mission import SpaceMission
+
+utils.check_for_newer_version()
+seed = utils.get_seed('somiamc')
+system = SolarSystem(seed)
+mission = SpaceMission(seed)
+
+planets = np.array([['Doofenshmirtz', 'black'], ['Blossom', 'crimson'], 
+                    ['Bubbles', 'skyblue'], ['Buttercup', 'olivedrab'], 
+                    ['Flora', 'pink'], ['Stella', 'gold'], ['Aisha', 'darkorchid']])
+
+G = 4*np.pi**2                          # gravitation constant [AU**3yr**(-2)M**(-1)]
 
 def plot_orbits(planets, N, a, e, init_angles, a_angles):
     x = np.zeros((len(planets), N))
@@ -18,14 +34,11 @@ def plot_orbits(planets, N, a, e, init_angles, a_angles):
     plt.legend()
     plt.xlabel('x [AU]')
     plt.ylabel('y [AU]')
+    plt.axis('equal')
     plt.title("Our planet's orbits around their sun")
-
-#HVORDAN SKAL APHELION ANGLE IMPLEMENTERES????????????????????????????????????????????????????????????????????????????
 
 @jit(nopython = True)
 def simulate_orbits(planets, N, dt, init_angles, r0, v0, M):
-    G = 4*np.pi**2                          # gravitation constant [AU**3yr**(-2)M**(-1)]
-    
     theta = np.zeros((N, len(planets)))
     r = np.zeros((N, len(planets), 2))
     v = np.zeros((N, len(planets), 2))
@@ -55,8 +68,6 @@ A. Planetary Orbits
 '''
 Task 1
 '''
-
-# [M] is the unit for solar mass
 
 a = system.semi_major_axes                   # each planet's semi major axis [AU]
 e = system.eccentricities                    # each planet's eccentricity
@@ -94,6 +105,7 @@ theta, r, v = simulate_orbits(planets, N, dt, init_angles, r0, v0, M)
 
 for i in range(len(planets)):
     plt.plot(r[:, i, 0], r[:, i, 1], color = planets[i][1])
+plt.axis('equal')
 plt.show()
 
 
@@ -167,13 +179,14 @@ def main():
         numerical_P[i] = (count[i][1] - count[i][0])*2*dt
         print(f"{planets[i][0]}: numerical approximation: {numerical_P[i]:.3f} years, Kepler's version: {Kepler_P[i]:.3f} years, Newton's version: {Newton_P[i]:.3f} years\n")
     
+    #TODO
     #ER IKKE KEPLERS METODE VELDIG FEIL? REGNET UT RIKTIG???????????????????????????????????????????????????????????????????????????????????????????????
     #SKAL VI BRUKE SOLMASSER?
     #ER NEWTON ELLER NUMERISK FASITEN?
     
-    r_reshaped = np.reshape(r, (2, 7, 400000))
+    rnew = np.einsum("ijk->kji", r)
  
-    mission.verify_planet_positions(40*P, r_reshaped)
+    mission.verify_planet_positions(40*P, rnew)
 
 
 '''changing variable names for part 3'''
@@ -276,8 +289,9 @@ Aisha: numerical approximation: 61.305 years, Kepler's version: 107.245 years, N
 
 FROM VERIFICATION:
     
-The biggest relative deviation was for planet 0, which drifted 1108.33 % from its actual position.
-Your planets are not where they should be after 20 orbits of your home planet.
-Check your program for flaws or experiment with your time step for more precise trajectories.
+The biggest relative deviation was for planet 0, which drifted 0.0329607 % from its actual position.
+Your planet trajectories were satisfyingly calculated. Well done!
+*** Achievement unlocked: Well-behaved planets! ***
+Exact planet trajectories saved to planet_trajectories.npz.
 '''
 

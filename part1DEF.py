@@ -1,6 +1,21 @@
 #EGEN KODE
-from libraries import *
+import numpy as np
+from tqdm import trange
+from numba import jit
+import ast2000tools.constants as const
+import ast2000tools.utils as utils
+from ast2000tools.solar_system import SolarSystem
+from ast2000tools.space_mission import SpaceMission
 from part1BC import gasboxwnozzle, m_H2, my, sigma, L, time, steps
+
+utils.check_for_newer_version()
+seed = utils.get_seed('somiamc')
+system = SolarSystem(seed)
+mission = SpaceMission(seed)
+
+planets = np.array([['Doofenshmirtz', 'black'], ['Blossom', 'crimson'], 
+                    ['Bubbles', 'skyblue'], ['Buttercup', 'olivedrab'], 
+                    ['Flora', 'pink'], ['Stella', 'gold'], ['Aisha', 'darkorchid']])
 
 G = const.G                                                 # gravitation constant [m**3s**(-2)kg**(-1)]
 M = system.masses[0]*const.m_sun                            # mass of our home planet [kg]
@@ -24,12 +39,6 @@ def fuel_consumption(N_box, thrust_f, initial_m, fuel_loss_s, delta_v):
     
     return tot_fuel_loss
 
-def gravity(r, rocket_m):
-    theta = r[0]/np.linalg.norm(r)                                      # angle between our current 
-                                                                        # positional vector and the x-axis
-    abs_fG = - G*M*rocket_m/np.linalg.norm(r)**2                        # absolute value of the gravitational pull
-    fG = np.array([abs_fG*np.cos(theta), abs_fG*np.sin(theta)])         # vectorized gravitational pull
-    return fG
 
 def rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate):
     sim_launch_duration = 0             # duration of our simulated rocket launch [s]
@@ -48,11 +57,12 @@ def rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate):
         
         if distance_rp - distance_ps < 0:                               # the planet's reference system
             v_esc = np.sqrt(2*G*M/distance_rp)                          # the current escape velocity [m/s]
-            fG = gravity(r[i], rocket_m)                                # the gravitational pull from our home planet [N]
+            fG = - G*M*rocket_m/np.linalg.norm(r[i])**3*r[i]            # the gravitational pull from our home planet [N]
             
         elif distance_rp - distance_ps >= 0:                            # the sun's reference system
             v_esc = np.sqrt(2*G*M/(distance_rp - distance_ps))          # the current escape velocity [m/s]
-            fG = gravity(r[i] - np.array([x0, y0]), rocket_m)           # the gravitational pull from our home planet [N]
+            pos = r[i] - np.array([x0, y0])
+            fG = - G*M*rocket_m/np.linalg.norm(pos)**3*pos              # the gravitational pull from our home planet [N]
             
         a = np.array([(thrust_f + fG[0])/rocket_m, fG[1]/rocket_m])     # the rocket's total acceleration at current time step [m/s**2]
         v[i+1] = v[i] + a*dt                                            # updated velocity
@@ -120,7 +130,7 @@ print(f'The rocket uses a total of {tot_fuel_loss:g} kg fuel to boost its speed 
 E. Simulating a Rocket Launch
 '''
 '''
-let's assume that we wish to lauch our rocket from the equator, on the side of the
+let's assume that we wish to launch our rocket from the equator, on the side of the
 planet facing away from our sun. then our initial position will be as follows
 '''
 r0 = np.array([R, 0.0])
@@ -190,9 +200,16 @@ mission.set_launch_parameters(thrust = thrust_f,
 
 mission.launch_rocket()
 
+'''
 position_after_launch = np.array([utils.m_to_AU(r[-1][0]), utils.m_to_AU(r[-1][1])])
-
 mission.verify_launch_result(position_after_launch)
+'''
+
+from ast2000tools.shortcuts import SpaceMissionShortcuts
+shortcut = SpaceMissionShortcuts(mission, [10978])
+
+fuel_consumed, time_after_launch, pos_after_launch, vel_after_launch = shortcut.get_launch_results()
+mission.verify_launch_result(pos_after_launch)
 
 
 '''

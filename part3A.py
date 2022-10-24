@@ -1,5 +1,17 @@
 #EGEN KODE
-from libraries import *
+import numpy as np
+import ast2000tools.utils as utils
+from ast2000tools.solar_system import SolarSystem
+from ast2000tools.space_mission import SpaceMission
+
+utils.check_for_newer_version()
+seed = utils.get_seed('somiamc')
+system = SolarSystem(seed)
+mission = SpaceMission(seed)
+
+planets = np.array([['Doofenshmirtz', 'black'], ['Blossom', 'crimson'], 
+                    ['Bubbles', 'skyblue'], ['Buttercup', 'olivedrab'], 
+                    ['Flora', 'pink'], ['Stella', 'gold'], ['Aisha', 'darkorchid']])
 
 '''
 A: The Habitable Zone

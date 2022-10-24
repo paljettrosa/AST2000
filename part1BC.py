@@ -1,6 +1,22 @@
 #EGEN KODE
-from libraries import *
+import numpy as np
+import matplotlib.pyplot as plt
+from tqdm import trange
+from numba import jit
+import ast2000tools.constants as const
+import ast2000tools.utils as utils
+from ast2000tools.solar_system import SolarSystem
+from ast2000tools.space_mission import SpaceMission
 from part1A import MaxwellBoltzmann_v
+
+utils.check_for_newer_version()
+seed = utils.get_seed('somiamc')
+system = SolarSystem(seed)
+mission = SpaceMission(seed)
+
+planets = np.array([['Doofenshmirtz', 'black'], ['Blossom', 'crimson'], 
+                    ['Bubbles', 'skyblue'], ['Buttercup', 'olivedrab'], 
+                    ['Flora', 'pink'], ['Stella', 'gold'], ['Aisha', 'darkorchid']])
 
 @jit(nopython = True)
 def gasbox(my, sigma, N, L, time, steps):
@@ -148,20 +164,20 @@ if __name__ == '__main__':
 '''
 FROM B:
     
-With 100 H2-molecules in our gasbox, 896 molecules hit a wall in the box during the time interval of 1e-09 s
+With 100 H2-molecules in our gasbox, 840 molecules hit a wall in the box during the time interval of 1e-09 s
 The particles have an average kinetic energy of 6.21292e-20 when calculated analytically, and
-6.88348e-20 when calculated numerically
-The numerical result deviates approximately 10.79 % from the analytical, with a relative error of 0.10793
+6.52807e-20 when calculated numerically
+The numerical result deviates approximately 5.07 % from the analytical, with a relative error of 0.0507247
 
-With 100000 H2-molecules in our gasbox, 839009 molecules hit a wall in the box during the time interval of 1e-09 s
+With 100000 H2-molecules in our gasbox, 838030 molecules hit a wall in the box during the time interval of 1e-09 s
 The particles have an average kinetic energy of 6.21292e-20 when calculated analytically, and
-6.22095e-20 when calculated numerically
-The numerical result deviates approximately 0.13 % from the analytical, with a relative error of 0.00129253
+6.22595e-20 when calculated numerically
+The numerical result deviates approximately 0.21 % from the analytical, with a relative error of 0.00209709
 
 
 FROM C:
 
-There are 3.5297e+13 particles exiting the gas box per second
-The gas box exerts a thrust of 4.87106e-10 N
-The box loses a mass of 1.18155e-13 kg/s
+There are 3.5418e+13 particles exiting the gas box per second
+The gas box exerts a thrust of 4.91288e-10 N
+The box loses a mass of 1.1856e-13 kg/s
 '''

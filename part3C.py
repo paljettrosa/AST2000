@@ -1,10 +1,23 @@
 #EGEN KODE
-from libraries import *
+import numpy as np
+from tqdm import trange
+import ast2000tools.constants as const
+import ast2000tools.utils as utils
+from ast2000tools.solar_system import SolarSystem
+from ast2000tools.space_mission import SpaceMission
 from part1BC import gasboxwnozzle, m_H2, my, sigma, L, time, steps
 from part2AB import dt_p, r_p, v_p
 
-G = const.G                                         # gravitation constant [m**3s**(-2)kg**(-1)]
+utils.check_for_newer_version()
+seed = utils.get_seed('somiamc')
+system = SolarSystem(seed)
+mission = SpaceMission(seed)
 
+planets = np.array([['Doofenshmirtz', 'black'], ['Blossom', 'crimson'], 
+                    ['Bubbles', 'skyblue'], ['Buttercup', 'olivedrab'], 
+                    ['Flora', 'pink'], ['Stella', 'gold'], ['Aisha', 'darkorchid']])
+
+G = const.G                                         # gravitation constant [m**3s**(-2)kg**(-1)]
 m_p = system.masses*const.m_sun                     # planets' masses [kg]
 R_p = system.radii*1e3                              # planets' radiis [m]
 T_p = system.rotational_periods*const.day           # planets' rotational periods [s]
@@ -14,13 +27,6 @@ v_p = utils.AU_pr_yr_to_m_pr_s(v_p)                 # planets' velocities relati
 '''
 C: Generalized Launch Codes
 '''
-
-def gravity_g(r, rocket_m, planet_m):                                                       # generalized version of our gravity function from part 1
-    theta = r[0]/np.linalg.norm(r)                                                          # angle between our current 
-                                                                                            # positional vector and the x-axis
-    abs_fG = - G*planet_m*rocket_m/np.linalg.norm(r)**2                                     # absolute value of the gravitational pull
-    fG = np.array([abs_fG*np.cos(theta), abs_fG*np.sin(theta)])                             # vectorized gravitational pull
-    return fG
 
 def rocket_launch_g(t0, p_idx, phi, max_time, dt, thrust_f, initial_m, mass_loss_rate):     # generalized version of our rocket_launch function from part 1
 
@@ -48,13 +54,13 @@ def rocket_launch_g(t0, p_idx, phi, max_time, dt, thrust_f, initial_m, mass_loss
         distance_rp = np.linalg.norm(r[i])                              # the current distance from the planet's center of mass [m]
         v_esc = np.sqrt(2*G*planet_m/distance_rp)                       # the current escape velocity [m/s]
         
-        fG = gravity_g(r[i], rocket_m, planet_m)                        # the gravitational pull from the chosen planet [N]
+        fG = - G*planet_m*rocket_m/np.linalg.norm(r[i])**3*r[i]         # the gravitational pull from the chosen planet [N]
         a = np.array([(thrust_f + fG[0])/rocket_m, fG[1]/rocket_m])     # the rocket's total acceleration at current time step [m/s**2]
         
         v[i+1] = v[i] + a*dt/2                                            
         r[i+1] = r[i] + v[i+1]*dt   
 
-        fG = gravity_g(r[i+1], rocket_m, planet_m)                      # the gravitational pull from the chosen planet [N]
+        fG = - G*planet_m*rocket_m/np.linalg.norm(r[i+1])**3*r[i+1]     # the gravitational pull from the chosen planet [N]
         a = np.array([(thrust_f + fG[0])/rocket_m, fG[1]/rocket_m])     # the rocket's total acceleration at current time step [m/s**2]
 
         v[i+1] = v[i+1] + a*dt/2  
@@ -104,23 +110,25 @@ def rocket_launch_g(t0, p_idx, phi, max_time, dt, thrust_f, initial_m, mass_loss
         distance_rp = np.linalg.norm(r[i])                              # the current distance from our point of reference [m]
         v_esc = np.sqrt(2*G*planet_m/(distance_rp - distance_ps))       # the current escape velocity [m/s]
         
-        fG = gravity_g(r[i] - r0_p, rocket_m, planet_m)                 # the gravitational pull from the chosen planet [N]
+        pos = r[i] - r0_p
+        fG = - G*planet_m*rocket_m/np.linalg.norm(pos)**3*pos           # the gravitational pull from the chosen planet [N]
         a = np.array([(thrust_f + fG[0])/rocket_m, fG[1]/rocket_m])     # the rocket's total acceleration at current time step [m/s**2]
         
         v[i+1] = v[i] + a*dt/2                                            
         r[i+1] = r[i] + v[i+1]*dt   
-
-        fG = gravity_g(r[i+1] - r0_p, rocket_m, planet_m)               # the gravitational pull from the chosen planet [N]
+        
+        pos = r[i+1] - r0_p
+        fG = - G*planet_m*rocket_m/np.linalg.norm(pos)**3*pos           # the gravitational pull from the chosen planet [N]
         a = np.array([(thrust_f + fG[0])/rocket_m, fG[1]/rocket_m])     # the rocket's total acceleration at current time step [m/s**2]
 
         v[i+1] = v[i+1] + a*dt/2  
                        
         rocket_m -= mass_loss_rate*dt                                   # updating the rocket's mass during the launch
-        '''
+        
         if thrust_f <= np.linalg.norm(fG):                              # checking if the thrust force is too low       
             print('Thrust force is too low!')
             break
-        '''
+        
         if rocket_m <= 0:                                               # checking if we run out of fuel
             print('Ran out of fuel!')
             break
@@ -191,7 +199,7 @@ mission.set_launch_parameters(thrust = thrust_f,
 
 mission.launch_rocket()
 
-''' 'trying with other parameters '''
+''' 'trying with other parameters ''' #TODO fiks dette så vi klarer launch
 
 N_H2 = 7*10**6                           # number of H_2 molecules
 
