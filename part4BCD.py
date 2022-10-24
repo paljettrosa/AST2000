@@ -183,22 +183,6 @@ r_s = trilateration(launch_duration, distances)
 
 mission.verify_manual_orientation(r_s, vxy, phi0)
 
-
-'''
-1. The first step is to use the satellite’s onboard
-equipement in order to gather the necessary data.
-This is done using the following methods of your
-SpaceMission instance: take picture (rotational
-orientation), measure star doppler shifts (velocity) and measure distances (position).
-
-2. The next step is analyse the data using your orientation software.
-
-3. The final step is to use the
-verify manual orientation method in order to verify your calculations have been done
-correctly.
-'''
-
-
 '''
 RESULTS:
 
