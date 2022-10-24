@@ -20,9 +20,14 @@ planets = np.array([['Doofenshmirtz', 'black'], ['Blossom', 'crimson'],
 G = const.G                                                 # gravitation constant [m**3s**(-2)kg**(-1)]
 M = system.masses[0]*const.m_sun                            # mass of our home planet [kg]
 R = system.radii[0]*10**3                                   # our planet's radius [m]
+
 x0 = utils.AU_to_m(system.initial_positions[0][0])          # our planet's initial x-position relative to our sun [m]
 y0 = utils.AU_to_m(system.initial_positions[1][0])          # our planet's initial y-position relative to our sun [m]
-distance_ps = np.linalg.norm(np.array([x0, y0]))            # the distance from our planet to our sun [m]                                          
+distance_ps = np.linalg.norm(np.array([x0, y0]))            # the distance from our planet to our sun [m]
+
+spacecraft_m = spacecraft_m = mission.spacecraft_mass       # mass of rocket without fuel [kg]
+spacecraft_A = mission.spacecraft_area                      # area of our spacecraft's cross section [m**2]                                          
+
 
 @jit(nopython = True)
 def fuel_consumption(N_box, thrust_f, initial_m, fuel_loss_s, delta_v):
@@ -69,11 +74,11 @@ def rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate):
         r[i+1] = r[i] + v[i+1]*dt                                       # updated position
         rocket_m -= mass_loss_rate*dt                                   # updating the rocket's mass during the launch
         
-        if thrust_f <= np.linalg.norm(fG):                              # checking if the thrust force is too low       
+        if thrust_f < np.linalg.norm(fG):                               # checking if the thrust force is too low       
             print('Thrust force is too low!')
             break
         
-        if rocket_m <= 0:                                               # checking if we run out of fuel
+        if rocket_m <= spacecraft_m:                                    # checking if we run out of fuel
             print('Ran out of fuel!')
             break
         
@@ -96,7 +101,7 @@ def rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate):
 '''
 D. The Rocket Engine's Performance
 '''
-N_H2 = 2*10**6                          # number of H_2 molecules
+N_H2 = 5*10**6                          # number of H_2 molecules
 
 r, v, exiting, f = gasboxwnozzle(my, sigma, N_H2, m_H2, L, time, steps)
 
@@ -104,9 +109,8 @@ particles_s = exiting/time              # the number of particles exiting per se
 mean_f = f/steps                        # the box force averaged over all time steps [N]
 fuel_loss_s = particles_s*m_H2          # the total fuel loss per second [kg/s]
 
-A_box = L*L                             # area of one gasbox [m**2]
-A_spacecraft = mission.spacecraft_area  # area of our spacecraft's cross section [m**2]
-N_box = int(A_spacecraft/A_box)         # number of gasboxes                   
+box_A = L*L                             # area of one gasbox [m**2]
+N_box = int(spacecraft_A/box_A)         # number of gasboxes                   
 thrust_f = N_box*mean_f                 # the combustion chamber's total thrust force [N]
 
 print(f'There are {particles_s*N_box:g} particles exiting the combustion chamber per second')
@@ -114,7 +118,7 @@ print(f'The combustion chamber exerts a thrust of {thrust_f:g} N')
 print(f'The combustion chamber loses a mass of {fuel_loss_s*N_box:g} kg/s\n')
 
 spacecraft_m = mission.spacecraft_mass  # mass of rocket without fuel [kg]
-fuel_m = 1.5*10**4                      # mass of feul [kg]
+fuel_m = 4*10**4                        # mass of feul [kg]
 initial_m = spacecraft_m + fuel_m       # initial rocket mass [kg]
 
 delta_v = 10**4                         # change in the rocket's velocity [m/s]
@@ -184,7 +188,7 @@ mean_f = f/steps
 fuel_loss_s = particles_s*m_H2
 mass_loss_rate = N_box*fuel_loss_s                                
 thrust_f = N_box*mean_f                
-fuel_m = 3*fuel_m   
+fuel_m = 4.5*10**4  
 initial_m = spacecraft_m + fuel_m + m_H2*N_H2*N_box                                             
 
 ''' launching '''
@@ -215,52 +219,52 @@ mission.verify_launch_result(pos_after_launch)
 '''
 FROM D:
     
-There are 1.1314e+28 particles exiting the combustion chamber per second
-The combustion chamber exerts a thrust of 156494 N
-The combustion chamber loses a mass of 37.8731 kg/s
-The rocket uses a total of 38963.5 kg fuel to boost its speed 10000 m/s
+There are 2.8297e+28 particles exiting the combustion chamber per second
+The combustion chamber exerts a thrust of 391078 N
+The combustion chamber loses a mass of 94.7226 kg/s
+The rocket uses a total of 99547.9 kg fuel to boost its speed 10000 m/s
 
 
 FROM E:
     
-The rocket uses a total of 38963.5 kg fuel to boost its speed 10000 m/s
-The rocket's position is at x = 7257.55 km, y = -750.01 km
+The rocket's position is at x = 7024.51 km, y = -149.704 km
 when it reaches the escape velocity
-When the rocket reaches it's escape velocity of 9988.5 m/s, it's
-velocity has a horisontal component of 9438.36 m/s and a vertical
-component of -3269.17 m/s
-The simulated rocket launch took 398 seconds, which is
+When the rocket reaches it's escape velocity of 10052.3 m/s, it's
+velocity has a horisontal component of 10046.9 m/s and a vertical
+component of -329.784 m/s
+The simulated rocket launch took 419 seconds, which is
 approximately 6 minutes
 When the rocket reached it's escape velocity, it's total mass was
-down to 988.622 kg, which means it lost a total of 15111.4 kg fuel
+down to 1316.51 kg, which means it lost a total of 39783.5 kg fuel
 during the launch
 
 
 FROM F:
     
     SIMULATION RESULTS:
-
-The rocket's position is at x = 5.29721e+08 km, y = -1373.6 km
+The rocket's position is at x = 5.29721e+08 km, y = -275.863 km
 when it reaches the escape velocity
-When the rocket reaches it's escape velocity of 10073.5 m/s, it's
-velocity has a horisontal component of 8767.07 m/s and a vertical
-component of -4961.19 m/s
-The simulated rocket launch took 374 seconds, which is
+When the rocket reaches it's escape velocity of 10224.3 m/s, it's
+velocity has a horisontal component of 10203.2 m/s and a vertical
+component of -656.714 m/s
+The simulated rocket launch took 392 seconds, which is
 approximately 6 minutes
 When the rocket reached it's escape velocity, it's total mass was
-down to 3438.3 kg, which means it lost a total of 42661.7 kg fuel
+down to 1505.13 kg, which means it lost a total of 44594.9 kg fuel
 during the launch
 
     LAUNCH RESULTS:
-    
 Rocket was moved up by 4.50388e-06 m to stand on planet surface.
 New launch parameters set.
-Launch completed, reached escape velocity in 390.68 s.
+Launch completed, reached escape velocity in 391.71 s.
 Your spacecraft position deviates too much from the correct position.
 
     VERIFICATION RESULTS:
-        
 The deviation is approximately 7.9315e-05 AU.
 Make sure you have included the rotation and orbital velocity of your home planet.
 Note that units are AU and relative the the reference system of the star.
+
+    WITH SHORTCUT:
+Your spacecraft position was satisfyingly calculated. Well done!
+*** Achievement unlocked: No free launch! ***
 '''

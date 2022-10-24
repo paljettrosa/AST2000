@@ -24,6 +24,9 @@ T_p = system.rotational_periods*const.day           # planets' rotational period
 r_p = utils.AU_to_m(r_p)                            # planets' positions relative to the sun during the orbits [m]
 v_p = utils.AU_pr_yr_to_m_pr_s(v_p)                 # planets' velocities relative to the sun during the orbits [m]
 
+spacecraft_m = spacecraft_m = mission.spacecraft_mass                  # mass of rocket without fuel [kg]
+spacecraft_A = mission.spacecraft_area                                 # area of our spacecraft's cross section [m**2]
+
 '''
 C: Generalized Launch Codes
 '''
@@ -71,7 +74,7 @@ def rocket_launch_g(t0, p_idx, phi, max_time, dt, thrust_f, initial_m, mass_loss
             print('Thrust force is too low!')
             break
         
-        if rocket_m <= 0:                                               # checking if we run out of fuel
+        if rocket_m <= spacecraft_m:                                               # checking if we run out of fuel
             print('Ran out of fuel!')
             break
         
@@ -129,7 +132,7 @@ def rocket_launch_g(t0, p_idx, phi, max_time, dt, thrust_f, initial_m, mass_loss
             print('Thrust force is too low!')
             break
         
-        if rocket_m <= 0:                                               # checking if we run out of fuel
+        if rocket_m <= spacecraft_m:                                               # checking if we run out of fuel
             print('Ran out of fuel!')
             break
         
@@ -165,13 +168,11 @@ particles_s = exiting/time                              # the number of particle
 mean_f = f/steps                                        # the box force averaged over all time steps [N]
 fuel_loss_s = particles_s*m_H2                          # the total fuel loss per second [kg/s]
 
-A_box = L*L                                             # area of one gasbox [m**2]
-A_spacecraft = mission.spacecraft_area                  # area of our spacecraft's cross section [m**2]
-N_box = int(A_spacecraft/A_box)                         # number of gasboxes                   
+box_A = L*L                                             # area of one gasbox [m**2]
+N_box = int(spacecraft_A/box_A)                         # number of gasboxes                   
 thrust_f = N_box*mean_f                                 # the combustion chamber's total thrust force [N]
 mass_loss_rate = N_box*fuel_loss_s                      # mass loss rate [kg/s] 
 
-spacecraft_m = mission.spacecraft_mass                  # mass of rocket without fuel [kg]
 fuel_m = 4.5*10**4                                      # mass of feul [kg]
 initial_m = spacecraft_m + fuel_m + m_H2*N_H2*N_box     # initial rocket mass [kg]
 
@@ -248,7 +249,7 @@ Launch completed, reached escape velocity in 391.5 s.
 
 
 FROM THE NORTH POLE ON BUTTERCUP TWO YEARS 
-AFTER PLANETARY ORBIT SIMULATION STARTET:
+AFTER PLANETARY ORBIT SIMULATION STARTED:
 
 Ran out of fuel!
 '''
