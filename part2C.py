@@ -211,11 +211,6 @@ def vr_from_group(m, M, filename):
     P_list = np.linspace(34, 40, 50)
     t0_list = np.linspace(11, 17, 50)
     
-    vr_list = np.linspace(-0.001, 0.001, 50)  
-    P_list = np.linspace(37, 43, 50)
-    t0_list = np.linspace(6, 11, 50)
-    #TODO fjern disse tre
-    
     est_m, vr, P, t0 = least_squares(M, t, v_obsreal, vr_list, P_list, t0_list)
     v_mod = delta(t, v_obsreal, vr, P, t0)[1]
     
@@ -471,22 +466,10 @@ the center of mass is in a focal point, so we see that both Flora and the sun ha
 slightly elliptical orbits with the center of mass in one of the focal points
 '''
 
-#TODOenergy(int(3*1e4), dt, m, M, r, v)
+energy(int(3*1e4), dt, m, M, r, v)
 
-#TODOangularmomentum(int(3*1e4), dt, m, M, r, v)
+angularmomentum(int(3*1e4), dt, m, M, r, v)
 
-'''
-RESULTS:
-    
-The relative error of the estimated energy of the system is 5.12e-07 %
-The relative error of the estimated angular momentum of the system is 2.87e-12 %
-
-when looking at the relative error, we can see that the total energy of our 
-two-body system is conserved relatively well throughout the numerical 
-simulation of the bodies' orbits 
-remember to comment on the conservation of angular momentum as well, so that
-it's more natural to reference the equation in the task
-'''
 
 
 
@@ -510,13 +493,12 @@ parallell with the plane in which our orbit it situated
 
 v_sun = v[:, 1]                                 # the velocity of our sun relative to the center of mass [AU/yr]
 t, v_real, v_obs = radial_velocity_curve(N, dt, v_sun, v_pec)
-print(np.mean(v_real)) #TODO FJERN
 
 '''
 Task 2
 '''
 
-#TODOvelocity_data(t, v_obs, 'velocitydata.txt')
+velocity_data(t, v_obs, r'/Users/paljettrosa/Documents/AST2000/velocitydata.txt')
 
 '''
 we now want to calculate the mass of an extrasolar planet using the radial 
@@ -527,7 +509,7 @@ sin(i) = 1. this gives us the smallest possible mass of the planet
 m_janniesc = 1.3966746879342887e-06             # the actual mass of the planet Oskar and Jannik used for their two-body system [M]
 M_janniesc = 4.4408144144136115                 # the actual mass of Oskar and Jannik's sun [M]
 
-#TODOest_m, vr_janniesc = vr_from_group(m_janniesc, M_janniesc, 'Radial-Velocity.txt')
+est_m, vr_janniesc = vr_from_group(m_janniesc, M_janniesc, r'/Users/paljettrosa/Documents/AST2000/Radial-Velocity.txt')
 
 
 
@@ -558,7 +540,7 @@ for i in range(N):
         break
 
 t, F_obs = light_curve(t0, N, m, M, F_rad, sun_rad, v_sun)
-light_curve_data(t, F_obs, 'lightcurvedata.txt')
+light_curve_data(t, F_obs, r'/Users/paljettrosa/Documents/AST2000/lightcurvedata.txt')
 
 '''
 Task 2 and 3
@@ -569,7 +551,7 @@ density = 3*m/(4*np.pi*radius**3)
 F_m = m/m_sun                                  
 M = M/m_sun                                     
 
-light_curve_from_group(F_m, M, 'lightcurvedata.txt', 'velocitydata.txt', radius, density)
+light_curve_from_group(F_m, M, r'/Users/paljettrosa/Documents/AST2000/lightcurvedata.txt', r'/Users/paljettrosa/Documents/AST2000/velocitydata.txt', radius, density)
 #TODO FÅ INFO AV OSKAR OG JANNIK    
 
 
@@ -585,8 +567,8 @@ Task 1
 
 ''' changing back to astronomical units '''
 
-#TODOM = M/m_sun                                         # our sun's mass [M]
-#TODOF_m = m/m_sun                                       # Flora's mass [M]
+M = M/m_sun                                         # our sun's mass [M]
+F_m = m/m_sun                                       # Flora's mass [M]
 D_m = system.masses[0]                              # Doofenshmirtz' mass [M]
 B_m = system.masses[2]                              # Bubbles' mass [M]
 A_m = system.masses[6]                              # Aisha's mass [M] 
@@ -645,7 +627,6 @@ planets_v0 = np.array(v0[:4])
 N = 6*10**4             # amount of time steps
 dt = 3*P/N              # time step
 
-'''TODO
 r, v = nbody_orbits(N, dt, planets_m, M, planets_r0, planets_v0, sun_r0, sun_v0)
 
 planets_sun = np.array([['Doofenshmirtz', 'black'], ['Bubbles', 'skyblue'], 
@@ -675,7 +656,7 @@ plt.ylabel('y [AU]')
 plt.axis('equal')
 plt.title("Our sun's orbit around the center of mass")
 plt.show()
-TODO'''
+
 
 '''
 Task 2
@@ -684,8 +665,38 @@ Task 2
 v_pec = np.array([- 1.5*10**(-3), 0.0])         # center of mass velocity relative to observer (peculiar velocity) [AU]
 v_sun = v[:, -1]                                # the velocity of our sun relative to the center of mass [AU/yr]
 
-#TODOt, v_real, v_obs = radial_velocity_curve(N, dt, v_sun, v_pec)
+t, v_real, v_obs = radial_velocity_curve(N, dt, v_sun, v_pec)
 
-#TODOvelocity_data(t, v_obs, 'velocitydata_nbody.txt')
+velocity_data(t, v_obs, r'/Users/paljettrosa/Documents/AST2000/velocitydata_nbody.txt')
 
 #TODO, FÅ FRA OSKAR
+
+
+'''
+RESULTS:
+
+        ENERGY AND ANGULAR MOMENTUM CONSERVATION:
+    The relative error of the estimated energy of the system is 5.12e-07 %
+    The relative error of the estimated angular momentum of the system is 2.87e-12 %
+    NB! IKKE RESULTAT, MEN KOMMENTAR
+    when looking at the relative error, we can see that the total energy of our 
+    two-body system is conserved relatively well throughout the numerical 
+    simulation of the bodies' orbits 
+    remember to comment on the conservation of angular momentum as well, so that
+    it's more natural to reference the equation in the task
+
+        RADIAL VELOCITY ANALYSIS:
+    The estimated radial velocity of Oskar and Jannik's star is 2.225e-03 m/s
+    The estimated revolution period for Oskar and Jannik's star is 34.612 years
+    The estimated time stamp of the sun's first peak in radial velocity is at t0 = 13.694 years
+    The estimated mass of the planet is 6.578e-07 solar masses, while the actual mass is 1.397e-06 solar masses.
+    The relative error is 52.90 %.
+    Their estimated inclination is i = 28.10 deg
+    TODO RESULTATENE ER FOR FEIL, ER DET NOE GALT MED FORMLENE?
+
+        LIGHT CURVE ANALYSIS:
+    TODO MANGLER TEKSTFIL FRA OSKAR OG JANNIK
+
+        NBODY RADIAL VELOCITY ANALYSIS:
+    TODO MANGLER TEKSTFIL FRA OSKAR OG JANNIK
+'''
