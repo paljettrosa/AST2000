@@ -1,7 +1,7 @@
 #EGEN KODE
 import numpy as np
 from PIL import Image
-import imageio as ig
+import imageio.v2 as ig
 import ast2000tools.utils as utils
 from ast2000tools.solar_system import SolarSystem
 from ast2000tools.space_mission import SpaceMission
@@ -21,7 +21,7 @@ A. Generating Reference Pictures
 '''
 Task 2
 '''
-img = Image.open('sample0000.png')
+img = Image.open(r'/Users/paljettrosa/Documents/AST2000/sample0000.png')
 pixels = np.array(img)
 width = len(pixels[0, :])
 length = len(pixels[:, 0])
@@ -58,7 +58,7 @@ phi0 = 0
 theta, phi = stereographic_projection(X, Y)
 
 def generate_picture(theta, phi, width = 640, length = 480, theta0 = np.pi/2, phi0 = 0):
-    sky_sphere = np.load('himmelkule.npy')
+    sky_sphere = np.load(r'/Users/paljettrosa/Documents/AST2000/himmelkule.npy')
     pxl_idx = np.zeros((length, width))
     pixels = np.zeros((length, width, 3), dtype = "uint8")
     for i in range(length):
@@ -70,14 +70,14 @@ def generate_picture(theta, phi, width = 640, length = 480, theta0 = np.pi/2, ph
     return picture
 
 picture = generate_picture(theta, phi)
-picture.save('sample0000_recreated.png')
+picture.save(r'/Users/paljettrosa/Documents/AST2000/sample0000_recreated.png')
 
 '''
 Task 3
 '''
 
 def generate_picture_360(X, Y, phi_array, width = 640, length = 480, theta0 = np.pi/2):
-    sky_sphere = np.load('himmelkule.npy')
+    sky_sphere = np.load(r'/Users/paljettrosa/Documents/AST2000/himmelkule.npy')
     pxl_idx = np.zeros((length, width))
     pixels = np.zeros((length, width, 3), dtype = "uint8")
     gif_array = []
@@ -89,14 +89,17 @@ def generate_picture_360(X, Y, phi_array, width = 640, length = 480, theta0 = np
                 for k in range(3):
                     pixels[i, j, k] = sky_sphere[int(pxl_idx[i, j]), k+2]
         picture = Image.fromarray(pixels)
-        picture.save(f'phi_{phi0}_deg.png')
-        gif_array.append(ig.imread(f'phi_{phi0}_deg.png'))
-    ig.mimsave('spacecraft_position.gif', gif_array) 
+        picture.save(f'/Users/paljettrosa/Documents/AST2000/phi/phi_{phi0:.1f}_deg.png')
+        gif_array.append(ig.imread(f'/Users/paljettrosa/Documents/AST2000/phi/phi_{phi0:.1f}_deg.png'))
+    ig.mimsave(r'/Users/paljettrosa/Documents/AST2000/spacecraft_position.gif', gif_array) 
 
-phi_array = np.linspace(0, 359, 3600)
+#phi_array = np.linspace(0, 359, 360)
+phi_array = np.linspace(0, 359.9, 3600)
 generate_picture_360(X, Y, phi_array)
 
 '''
+RESULTS
+
 There are 640 pixels in the horizontal direction, 480 pixels in the vertical 
 direction, and the picture consists of a total of 307200 pixels
 '''
