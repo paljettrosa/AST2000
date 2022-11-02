@@ -27,6 +27,7 @@ v_p = utils.AU_pr_yr_to_m_pr_s(v_p)                 # planets' velocities relati
 spacecraft_m = spacecraft_m = mission.spacecraft_mass                  # mass of rocket without fuel [kg]
 spacecraft_A = mission.spacecraft_area                                 # area of our spacecraft's cross section [m**2]
 
+
 '''
 C: Generalized Launch Codes
 '''

@@ -70,9 +70,11 @@ def gasboxwnozzle(my, sigma, N, m, L, time, steps):
                 
                 r[j] = (np.random.uniform(0, L, size = (1, 3)))      # giving it a random position within the box
                 v[j] = (np.random.normal(my, sigma, size = (1, 3)))  # giving it a random velocity
+
             for l in range(3):
                 if r[j][l] <= 0 or r[j][l] >= L:                     # checking if the particle hits one of the walls
                      v[j][l] = - v[j][l]                             # bouncing the particle back
+                     
         r += v*dt                                                    # updating the particles' positions
         
     return r, v, exiting, f

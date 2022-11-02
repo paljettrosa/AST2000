@@ -70,8 +70,19 @@ def rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate):
             fG = - G*M*rocket_m/np.linalg.norm(pos)**3*pos              # the gravitational pull from our home planet [N]
             
         a = np.array([(thrust_f + fG[0])/rocket_m, fG[1]/rocket_m])     # the rocket's total acceleration at current time step [m/s**2]
-        v[i+1] = v[i] + a*dt                                            # updated velocity
+        v[i+1] = v[i] + a*dt/2                                          # updated velocity
         r[i+1] = r[i] + v[i+1]*dt                                       # updated position
+
+        if distance_rp - distance_ps < 0:                               # the planet's reference system
+            v_esc = np.sqrt(2*G*M/distance_rp)                          # the current escape velocity [m/s]
+            fG = - G*M*rocket_m/np.linalg.norm(r[i+1])**3*r[i+1]        # the gravitational pull from our home planet [N]
+            
+        elif distance_rp - distance_ps >= 0:                            # the sun's reference system
+            v_esc = np.sqrt(2*G*M/(distance_rp - distance_ps))          # the current escape velocity [m/s]
+            pos = r[i+1] - np.array([x0, y0])
+            fG = - G*M*rocket_m/np.linalg.norm(pos)**3*pos              # the gravitational pull from our home planet [N]
+        
+        v[i+1] = v[i+1] + a*dt/2                                        # updated velocity   
         rocket_m -= mass_loss_rate*dt                                   # updating the rocket's mass during the launch
         
         if thrust_f < np.linalg.norm(fG):                               # checking if the thrust force is too low       
@@ -93,7 +104,7 @@ def rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate):
             print(f"When the rocket reached it's escape velocity, it's total mass was\ndown to {rocket_m:g} kg, which means it lost a total of {initial_m - rocket_m:g} kg fuel\nduring the launch\n")
             break                 
         
-    return r, v, sim_launch_duration
+    return r, v, sim_launch_duration, r[-1]
 
 
 
@@ -121,7 +132,7 @@ spacecraft_m = mission.spacecraft_mass  # mass of rocket without fuel [kg]
 fuel_m = 4*10**4                        # mass of feul [kg]
 initial_m = spacecraft_m + fuel_m       # initial rocket mass [kg]
 
-delta_v = 10**4                         # change in the rocket's velocity [m/s]
+delta_v = 10**3                         # change in the rocket's velocity [m/s]
 
 tot_fuel_loss = fuel_consumption(N_box, thrust_f, initial_m, fuel_loss_s, delta_v)
 
@@ -161,7 +172,7 @@ max_time = 20*60                                        # maximum launch time [s
 initial_m = spacecraft_m + fuel_m + m_H2*N_H2*N_box     # initial rocket mass [kg]
 mass_loss_rate = N_box*fuel_loss_s                      # mass loss rate [kg/s]
 
-r, v, sim_launch_duration = rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate)
+r, v, sim_launch_duration, final_pos = rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate)
 
 
 
@@ -180,20 +191,20 @@ v_orbit = end_y/sim_launch_duration                     # our rocket's initial v
 v0 = np.array([0.0, v_orbit + v_rot])                   # our rocket's initial velocity relative to our sun [m/s]
 
 ''' regulating launch parameters for the actual launch '''
-
-N_H2 = 6*10**6  
+  
+N_H2 = 6*10**6
 r_particles, v_particles, exiting, f = gasboxwnozzle(my, sigma, N_H2, m_H2, L, time, steps)
 particles_s = exiting/time              
 mean_f = f/steps                        
 fuel_loss_s = particles_s*m_H2
 mass_loss_rate = N_box*fuel_loss_s                                
-thrust_f = N_box*mean_f                
+thrust_f = N_box*mean_f    
 fuel_m = 4.5*10**4  
 initial_m = spacecraft_m + fuel_m + m_H2*N_H2*N_box                                             
 
 ''' launching '''
 
-r, v, sim_launch_duration = rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate)
+r, v, sim_launch_duration, final_pos = rocket_launch(r0, v0, max_time, dt, thrust_f, initial_m, mass_loss_rate)
 
 mission.set_launch_parameters(thrust = thrust_f, 
                               mass_loss_rate = mass_loss_rate, 

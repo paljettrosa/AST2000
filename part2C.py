@@ -65,7 +65,9 @@ def energy(N, dt, m, M, r, v):
     plt.xlabel('time [yr]')
     plt.ylabel('energy [J]')
     plt.title(f"The total energy of our two-body system\nduring the first {N*dt:.1f} years of the simulation")
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/energy_twobody.pdf')
 
     min_E = np.min(E)
     max_E = np.max(E)
@@ -92,7 +94,9 @@ def angularmomentum(N, dt, m, M, r, v):
     plt.xlabel('x-component [yr]')
     plt.ylabel('y-component [Ns]')
     plt.title(f"The total angular momentum of our two-body system\nduring the first {N*dt:.1f} years of the simulation")
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/angularmomentum_twobody.pdf')
 
     min_P = np.min(P)
     max_P = np.max(P)
@@ -112,7 +116,9 @@ def radial_velocity_curve(N, dt, v_star, v_pec):
     plt.xlabel('time [yr]')
     plt.ylabel('velocity [AU/yr]')
     plt.legend()
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/sun_vr&pec.pdf')
     
     ''' calculating noise '''
     
@@ -126,7 +132,9 @@ def radial_velocity_curve(N, dt, v_star, v_pec):
     plt.title('The radial velocity curve of our sun with noise')
     plt.xlabel('time [yr]')
     plt.ylabel('velocity [AU/yr]')
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/sun_vr_wnoise.pdf')
     
     return t, v_real, v_obs
 
@@ -195,14 +203,18 @@ def vr_from_group(m, M, filename):
     plt.legend()
     plt.xlabel('time [yr]')
     plt.ylabel('radial velocity [AU/yr]')
-    plt.title('Radial velocity curve made with data\nrecieved from Oskar and Jannik')
+    plt.title('Radial velocity curve made with data\nrecieved from group')
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/vrcurve_wpec_group.pdf')
     
     plt.plot(t, v_obsreal, 'k')
     plt.xlabel('time [yr]')
     plt.ylabel('radial velocity [AU/yr]')
-    plt.title('Radial velocity curve made with data\nrecieved from Oskar and Jannik\nwithout peculiar velocity')
+    plt.title('Radial velocity curve made with data recieved from\ngroup without peculiar velocity')
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/vrcurve_wopec_group.pdf')
     
     ''' approximation values gathered from plots '''
     
@@ -219,10 +231,12 @@ def vr_from_group(m, M, filename):
     plt.xlabel('time [yr]')
     plt.ylabel('radial velocity [AU/yr]')
     plt.title('Modelled radial velocity curve')
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/modelled_vrcurve_group.pdf')
 
-    print(f"The estimated radial velocity of Oskar and Jannik's star is {utils.AU_pr_yr_to_m_pr_s(vr):.3e} m/s")
-    print(f"The estimated revolution period for Oskar and Jannik's star is {P:.3f} years")
+    print(f"The estimated radial velocity of the group's star is {utils.AU_pr_yr_to_m_pr_s(vr):.3e} m/s")
+    print(f"The estimated revolution period for the group's star is {P:.3f} years")
     print(f"The estimated time stamp of the sun's first peak in radial velocity is at t0 = {t0:.3f} years")
     print(f'The estimated mass of the planet is {est_m:.3e} solar masses, while the actual mass is {m:.3e} solar masses.')
     print(f'The relative error is {abs(est_m - m)/m*100:.2f} %.')
@@ -268,7 +282,9 @@ def light_curve(t0, N, m, M, planet_rad, star_rad, v_star):
     plt.xlabel('time of observation [hours]')
     plt.ylabel('relative light flux')
     plt.title("The relative light flux of the star while the planet's eclipsing it")
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/lightcurve.pdf')
     
     return t, F_obs
 
@@ -303,8 +319,10 @@ def light_curve_from_group(m, M, filename_lc, filename_vr, radius, density):
     plt.plot(t, F_obs, 'k:')
     plt.xlabel("time of observation [hours]")
     plt.ylabel("relative flux")
-    plt.title("Light curve made with data recieved from Oskar and Jannik")
+    plt.title("Light curve made with data recieved from group")
+    fig = plt.gcf()
     plt.show()
+    fig.savefig(r'/Users/paljettrosa/Documents/AST2000/lightcurve_group.pdf')
 
     est_m, vr = vr_from_group(m, M, filename_vr)
     est_m = est_m*m_sun                             # estimated smallest mass of the group's planet [kg]
@@ -444,7 +462,9 @@ plt.xlabel('x [AU]')
 plt.ylabel('y [AU]')
 plt.axis('equal')
 plt.title("Flora's and our sun's orbit around their center of mass")
+fig = plt.gcf()
 plt.show()
+fig.savefig(r'/Users/paljettrosa/Documents/AST2000/Flora&sun_cm.pdf')
 
 
 plt.plot(r[:, 1, 0], r[:, 1, 1], color = 'orange', label = 'Sun')
@@ -459,7 +479,9 @@ plt.xlabel('x [AU]')
 plt.ylabel('y [AU]')
 plt.axis('equal')
 plt.title("Our sun's orbit around the center of mass")
+fig = plt.gcf()
 plt.show()
+fig.savefig(r'/Users/paljettrosa/Documents/AST2000/twobody_sunorbit_cm.pdf')
 
 '''
 the center of mass is in a focal point, so we see that both Flora and the sun has
@@ -640,7 +662,9 @@ plt.xlabel('x [AU]')
 plt.ylabel('y [AU]')
 plt.axis('equal')
 plt.title("Our planets' and sun's orbit around their common center of mass")
+fig = plt.gcf()
 plt.show()
+fig.savefig(r'/Users/paljettrosa/Documents/AST2000/nbody&sun_cm.pdf')
 
 
 plt.plot(r[:, -1, 0], r[:, -1, 1], color = 'orange', label = 'Sun')
@@ -655,7 +679,9 @@ plt.xlabel('x [AU]')
 plt.ylabel('y [AU]')
 plt.axis('equal')
 plt.title("Our sun's orbit around the center of mass")
+fig = plt.gcf()
 plt.show()
+fig.savefig(r'/Users/paljettrosa/Documents/AST2000/nbody_sunorbit_cm.pdf')
 
 
 '''

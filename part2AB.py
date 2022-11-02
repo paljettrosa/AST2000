@@ -106,7 +106,9 @@ theta, r, v = simulate_orbits(planets, N, dt, init_angles, r0, v0, M)
 for i in range(len(planets)):
     plt.plot(r[:, i, 0], r[:, i, 1], color = planets[i][1])
 plt.axis('equal')
+fig = plt.gcf()
 plt.show()
+fig.savefig(f'/Users/paljettrosa/Documents/AST2000/orbits_analytical&numerical.pdf')
 
 
 
@@ -180,13 +182,19 @@ def main():
         print(f"{planets[i][0]}: numerical approximation: {numerical_P[i]:.3f} years, Kepler's version: {Kepler_P[i]:.3f} years, Newton's version: {Newton_P[i]:.3f} years\n")
     
     #TODO
-    #ER IKKE KEPLERS METODE VELDIG FEIL? REGNET UT RIKTIG???????????????????????????????????????????????????????????????????????????????????????????????
+    #ER IKKE KEPLERS METODE VELDIG FEIL? REGNET UT RIKTIG?
     #SKAL VI BRUKE SOLMASSER?
     #ER NEWTON ELLER NUMERISK FASITEN?
     
     rnew = np.einsum("ijk->kji", r)
  
     mission.verify_planet_positions(40*P, rnew)
+
+    f = np.load(r'/Users/paljettrosa/Documents/AST2000/planet_trajectories.npz')
+    times = f['times']
+    exact_planet_positions = f['planet_positions']
+
+    system.generate_orbit_video(times, exact_planet_positions, filename = r'/Users/paljettrosa/Documents/AST2000/MCast/ssv_data/orbit_video.xml')
 
 
 '''changing variable names for part 3'''
@@ -287,11 +295,15 @@ Aisha: numerical approximation: 61.305 years, Kepler's version: 107.245 years, N
 
 
 
-FROM VERIFICATION:
+FROM VERIFICATION AND GENERATING ORBIT VIDEO:
     
 The biggest relative deviation was for planet 0, which drifted 0.0329607 % from its actual position.
 Your planet trajectories were satisfyingly calculated. Well done!
 *** Achievement unlocked: Well-behaved planets! ***
 Exact planet trajectories saved to planet_trajectories.npz.
+Generating orbit video with 713 frames.
+Note that planet/moon rotations and moon velocities are adjusted for smooth animation.
+XML file /Users/paljettrosa/Documents/MCast/ssv_data/orbit_video.xml was saved in XMLs/.
+It can be viewed in SSView.
 '''
 
